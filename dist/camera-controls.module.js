@@ -218,6 +218,9 @@ var CameraControls = (function (_super) {
         _this.colliderMeshes = [];
         _this.cancel = function () { };
         _this._enabled = true;
+        _this._enabledRotate = true;
+        _this._enabledZoom = true;
+        _this._enabledTranslate = true;
         _this._state = ACTION.NONE;
         _this._viewport = null;
         _this._dollyControlAmount = 0;
@@ -275,6 +278,9 @@ var CameraControls = (function (_super) {
             var dollyStart_1 = new THREE.Vector2();
             var elementRect_1 = new THREE.Vector4();
             var truckInternal_1 = function (deltaX, deltaY, dragToOffset) {
+                if (!_this._enabledTranslate) {
+                    return;
+                }
                 if (isPerspectiveCamera(_this._camera)) {
                     var camera_1 = _this._camera;
                     var offset = _v3A.copy(camera_1.position).sub(_this._target);
@@ -304,11 +310,17 @@ var CameraControls = (function (_super) {
                 }
             };
             var rotateInternal_1 = function (deltaX, deltaY) {
+                if (!_this._enabledRotate) {
+                    return;
+                }
                 var theta = PI_2 * _this.azimuthRotateSpeed * deltaX / elementRect_1.w;
                 var phi = PI_2 * _this.polarRotateSpeed * deltaY / elementRect_1.w;
                 _this.rotate(theta, phi, true);
             };
             var dollyInternal_1 = function (delta, x, y) {
+                if (!_this._enabledTranslate) {
+                    return;
+                }
                 var dollyScale = Math.pow(0.95, -delta * _this.dollySpeed);
                 var distance = _this._sphericalEnd.radius * dollyScale;
                 var prevRadius = _this._sphericalEnd.radius;
@@ -325,6 +337,9 @@ var CameraControls = (function (_super) {
                 return;
             };
             var zoomInternal_1 = function (delta, x, y) {
+                if (!_this._enabledZoom) {
+                    return;
+                }
                 var zoomScale = Math.pow(0.95, delta * _this.dollySpeed);
                 _this.zoomTo(_this._zoom * zoomScale);
                 if (_this.dollyToCursor) {
@@ -431,7 +446,7 @@ var CameraControls = (function (_super) {
                 dragStartPosition_1.copy(_v2);
                 lastDragPosition_1.copy(_v2);
                 var isMultiTouch = isTouchEvent(event) && event.touches.length >= 2;
-                if (isMultiTouch) {
+                if (isMultiTouch && _this._enabledTranslate) {
                     var touchEvent = event;
                     var dx = _v2.x - touchEvent.touches[1].clientX;
                     var dy = _v2.y - touchEvent.touches[1].clientY;
@@ -461,11 +476,15 @@ var CameraControls = (function (_super) {
                 switch (_this._state) {
                     case ACTION.ROTATE:
                     case ACTION.TOUCH_ROTATE: {
+                        if (!_this._enabledRotate)
+                            return;
                         rotateInternal_1(deltaX, deltaY);
                         break;
                     }
                     case ACTION.DOLLY:
                     case ACTION.ZOOM: {
+                        if (!_this._enabledTranslate)
+                            return;
                         var dollyX = _this.dollyToCursor ? (dragStartPosition_1.x - elementRect_1.x) / elementRect_1.z * 2 - 1 : 0;
                         var dollyY = _this.dollyToCursor ? (dragStartPosition_1.y - elementRect_1.y) / elementRect_1.w * -2 + 1 : 0;
                         _this._state === ACTION.DOLLY ?
@@ -479,6 +498,8 @@ var CameraControls = (function (_super) {
                     case ACTION.TOUCH_ZOOM_TRUCK:
                     case ACTION.TOUCH_DOLLY_OFFSET:
                     case ACTION.TOUCH_ZOOM_OFFSET: {
+                        if (!_this._enabledTranslate)
+                            return;
                         var touchEvent = event;
                         var dx = _v2.x - touchEvent.touches[1].clientX;
                         var dy = _v2.y - touchEvent.touches[1].clientY;
@@ -585,7 +606,43 @@ var CameraControls = (function (_super) {
             return this._enabled;
         },
         set: function (enabled) {
-            this._enabled = enabled;
+            this._enabledRotate = enabled;
+            if (!enabled)
+                this.cancel();
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(CameraControls.prototype, "enabledRotate", {
+        get: function () {
+            return this._enabled;
+        },
+        set: function (enabled) {
+            this._enabledRotate = enabled;
+            if (!enabled)
+                this.cancel();
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(CameraControls.prototype, "enabledZoom", {
+        get: function () {
+            return this._enabledZoom;
+        },
+        set: function (enabled) {
+            this._enabledZoom = enabled;
+            if (!enabled)
+                this.cancel();
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(CameraControls.prototype, "enabledTranslate", {
+        get: function () {
+            return this._enabledTranslate;
+        },
+        set: function (enabled) {
+            this._enabledTranslate = enabled;
             if (!enabled)
                 this.cancel();
         },

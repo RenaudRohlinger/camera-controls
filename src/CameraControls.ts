@@ -119,6 +119,9 @@ export class CameraControls extends EventDispatcher {
 	cancel: () => void = () => {};
 
 	protected _enabled = true;
+	protected _enabledRotate = true;
+	protected _enabledZoom = true;
+	protected _enabledTranslate = true;
 	protected _camera: _THREE.PerspectiveCamera | _THREE.OrthographicCamera;
 	protected _yAxisUpSpace: _THREE.Quaternion;
 	protected _yAxisUpSpaceInverse: _THREE.Quaternion;
@@ -248,6 +251,12 @@ export class CameraControls extends EventDispatcher {
 
 			const truckInternal = ( deltaX: number, deltaY: number, dragToOffset: boolean ): void => {
 
+				if ( ! this._enabledTranslate ) {
+
+					return;
+
+				}
+
 				if ( isPerspectiveCamera( this._camera ) ) {
 
 					const camera = this._camera;
@@ -299,6 +308,12 @@ export class CameraControls extends EventDispatcher {
 
 			const rotateInternal = ( deltaX: number, deltaY: number ): void => {
 
+				if ( ! this._enabledRotate ) {
+
+					return;
+
+				}
+
 				const theta = PI_2 * this.azimuthRotateSpeed * deltaX / elementRect.w; // divide by *height* to refer the resolution
 				const phi   = PI_2 * this.polarRotateSpeed   * deltaY / elementRect.w;
 				this.rotate( theta, phi, true );
@@ -306,6 +321,12 @@ export class CameraControls extends EventDispatcher {
 			};
 
 			const dollyInternal = ( delta: number, x: number, y : number ): void => {
+
+				if ( ! this._enabledTranslate ) {
+
+					return;
+
+				}
 
 				const dollyScale = Math.pow( 0.95, - delta * this.dollySpeed );
 				const distance = this._sphericalEnd.radius * dollyScale;
@@ -333,6 +354,12 @@ export class CameraControls extends EventDispatcher {
 			};
 
 			const zoomInternal = ( delta: number, x: number, y: number ): void => {
+
+				if ( ! this._enabledZoom ) {
+
+					return;
+
+				}
 
 				const zoomScale = Math.pow( 0.95, delta * this.dollySpeed );
 
@@ -518,7 +545,7 @@ export class CameraControls extends EventDispatcher {
 
 				const isMultiTouch = isTouchEvent( event ) && ( event as TouchEvent ).touches.length >= 2;
 
-				if ( isMultiTouch ) {
+				if ( isMultiTouch && this._enabledTranslate ) {
 
 					const touchEvent = event as TouchEvent;
 
@@ -567,6 +594,8 @@ export class CameraControls extends EventDispatcher {
 					case ACTION.ROTATE:
 					case ACTION.TOUCH_ROTATE: {
 
+						if ( ! this._enabledRotate ) return;
+
 						rotateInternal( deltaX, deltaY );
 						break;
 
@@ -574,6 +603,8 @@ export class CameraControls extends EventDispatcher {
 
 					case ACTION.DOLLY:
 					case ACTION.ZOOM: {
+
+						if ( ! this._enabledTranslate ) return;
 
 						const dollyX = this.dollyToCursor ? ( dragStartPosition.x - elementRect.x ) / elementRect.z *   2 - 1 : 0;
 						const dollyY = this.dollyToCursor ? ( dragStartPosition.y - elementRect.y ) / elementRect.w * - 2 + 1 : 0;
@@ -590,6 +621,8 @@ export class CameraControls extends EventDispatcher {
 					case ACTION.TOUCH_ZOOM_TRUCK:
 					case ACTION.TOUCH_DOLLY_OFFSET:
 					case ACTION.TOUCH_ZOOM_OFFSET: {
+
+						if ( ! this._enabledTranslate ) return;
 
 						const touchEvent = event as TouchEvent;
 						const dx = _v2.x - touchEvent.touches[ 1 ].clientX;
@@ -708,10 +741,52 @@ export class CameraControls extends EventDispatcher {
 
 	set enabled( enabled: boolean ) {
 
-		this._enabled = enabled;
+		this._enabledRotate = enabled;
 		if ( ! enabled ) this.cancel();
 
 	}
+
+	set enabledRotate( enabled: boolean ) {
+
+		this._enabledRotate = enabled;
+		if ( ! enabled ) this.cancel();
+
+	}
+
+	get enabledRotate(): boolean {
+
+		return this._enabled;
+
+	}
+
+	set enabledZoom( enabled: boolean ) {
+
+		this._enabledZoom = enabled;
+		if ( ! enabled ) this.cancel();
+
+	}
+
+	get enabledZoom(): boolean {
+
+		return this._enabledZoom;
+
+	}
+
+
+	set enabledTranslate( enabled: boolean ) {
+
+		this._enabledTranslate = enabled;
+		if ( ! enabled ) this.cancel();
+
+	}
+
+	get enabledTranslate(): boolean {
+
+		return this._enabledTranslate;
+
+	}
+
+
 
 	get currentAction(): ACTION {
 
