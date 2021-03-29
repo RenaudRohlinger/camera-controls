@@ -30,7 +30,7 @@ export declare class CameraControls extends EventDispatcher {
     protected _enabled: boolean;
     protected _enabledRotate: boolean;
     protected _enabledZoom: boolean;
-    protected _enabledTranslate: boolean;
+    protected _enabledTruck: boolean;
     protected _camera: _THREE.PerspectiveCamera | _THREE.OrthographicCamera;
     protected _yAxisUpSpace: _THREE.Quaternion;
     protected _yAxisUpSpaceInverse: _THREE.Quaternion;
@@ -63,8 +63,8 @@ export declare class CameraControls extends EventDispatcher {
     get enabledRotate(): boolean;
     set enabledZoom(enabled: boolean);
     get enabledZoom(): boolean;
-    set enabledTranslate(enabled: boolean);
-    get enabledTranslate(): boolean;
+    set enabledTruck(enabled: boolean);
+    get enabledTruck(): boolean;
     get currentAction(): ACTION;
     get distance(): number;
     set distance(distance: number);

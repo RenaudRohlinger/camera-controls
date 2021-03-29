@@ -220,7 +220,7 @@ var CameraControls = (function (_super) {
         _this._enabled = true;
         _this._enabledRotate = true;
         _this._enabledZoom = true;
-        _this._enabledTranslate = true;
+        _this._enabledTruck = true;
         _this._state = ACTION.NONE;
         _this._viewport = null;
         _this._dollyControlAmount = 0;
@@ -278,7 +278,7 @@ var CameraControls = (function (_super) {
             var dollyStart_1 = new THREE.Vector2();
             var elementRect_1 = new THREE.Vector4();
             var truckInternal_1 = function (deltaX, deltaY, dragToOffset) {
-                if (!_this._enabledTranslate) {
+                if (!_this._enabledTruck) {
                     return;
                 }
                 if (isPerspectiveCamera(_this._camera)) {
@@ -318,7 +318,7 @@ var CameraControls = (function (_super) {
                 _this.rotate(theta, phi, true);
             };
             var dollyInternal_1 = function (delta, x, y) {
-                if (!_this._enabledTranslate) {
+                if (!_this._enabledTruck) {
                     return;
                 }
                 var dollyScale = Math.pow(0.95, -delta * _this.dollySpeed);
@@ -446,7 +446,7 @@ var CameraControls = (function (_super) {
                 dragStartPosition_1.copy(_v2);
                 lastDragPosition_1.copy(_v2);
                 var isMultiTouch = isTouchEvent(event) && event.touches.length >= 2;
-                if (isMultiTouch && _this._enabledTranslate) {
+                if (isMultiTouch) {
                     var touchEvent = event;
                     var dx = _v2.x - touchEvent.touches[1].clientX;
                     var dy = _v2.y - touchEvent.touches[1].clientY;
@@ -483,8 +483,6 @@ var CameraControls = (function (_super) {
                     }
                     case ACTION.DOLLY:
                     case ACTION.ZOOM: {
-                        if (!_this._enabledTranslate)
-                            return;
                         var dollyX = _this.dollyToCursor ? (dragStartPosition_1.x - elementRect_1.x) / elementRect_1.z * 2 - 1 : 0;
                         var dollyY = _this.dollyToCursor ? (dragStartPosition_1.y - elementRect_1.y) / elementRect_1.w * -2 + 1 : 0;
                         _this._state === ACTION.DOLLY ?
@@ -498,8 +496,6 @@ var CameraControls = (function (_super) {
                     case ACTION.TOUCH_ZOOM_TRUCK:
                     case ACTION.TOUCH_DOLLY_OFFSET:
                     case ACTION.TOUCH_ZOOM_OFFSET: {
-                        if (!_this._enabledTranslate)
-                            return;
                         var touchEvent = event;
                         var dx = _v2.x - touchEvent.touches[1].clientX;
                         var dy = _v2.y - touchEvent.touches[1].clientY;
@@ -637,12 +633,12 @@ var CameraControls = (function (_super) {
         enumerable: false,
         configurable: true
     });
-    Object.defineProperty(CameraControls.prototype, "enabledTranslate", {
+    Object.defineProperty(CameraControls.prototype, "enabledTruck", {
         get: function () {
-            return this._enabledTranslate;
+            return this._enabledTruck;
         },
         set: function (enabled) {
-            this._enabledTranslate = enabled;
+            this._enabledTruck = enabled;
             if (!enabled)
                 this.cancel();
         },
@@ -1110,7 +1106,7 @@ var CameraControls = (function (_super) {
         if (this._camera.zoom !== this._zoom) {
             if (approxZero(zoomDelta))
                 this._zoom = this._zoomEnd;
-            this._camera.zoom = this._zoom;
+            this._camera.zoom = THREE.MathUtils.lerp(this._camera.zoom, this._zoom, lerpRatio);
             this._camera.updateProjectionMatrix();
             this._updateNearPlaneCorners();
             this._needsUpdate = true;

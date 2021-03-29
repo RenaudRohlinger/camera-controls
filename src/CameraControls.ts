@@ -121,7 +121,7 @@ export class CameraControls extends EventDispatcher {
 	protected _enabled = true;
 	protected _enabledRotate = true;
 	protected _enabledZoom = true;
-	protected _enabledTranslate = true;
+	protected _enabledTruck = true;
 	protected _camera: _THREE.PerspectiveCamera | _THREE.OrthographicCamera;
 	protected _yAxisUpSpace: _THREE.Quaternion;
 	protected _yAxisUpSpaceInverse: _THREE.Quaternion;
@@ -251,7 +251,7 @@ export class CameraControls extends EventDispatcher {
 
 			const truckInternal = ( deltaX: number, deltaY: number, dragToOffset: boolean ): void => {
 
-				if ( ! this._enabledTranslate ) {
+				if ( ! this._enabledTruck ) {
 
 					return;
 
@@ -322,7 +322,7 @@ export class CameraControls extends EventDispatcher {
 
 			const dollyInternal = ( delta: number, x: number, y : number ): void => {
 
-				if ( ! this._enabledTranslate ) {
+				if ( ! this._enabledTruck ) {
 
 					return;
 
@@ -545,7 +545,7 @@ export class CameraControls extends EventDispatcher {
 
 				const isMultiTouch = isTouchEvent( event ) && ( event as TouchEvent ).touches.length >= 2;
 
-				if ( isMultiTouch && this._enabledTranslate ) {
+				if ( isMultiTouch ) {
 
 					const touchEvent = event as TouchEvent;
 
@@ -604,7 +604,6 @@ export class CameraControls extends EventDispatcher {
 					case ACTION.DOLLY:
 					case ACTION.ZOOM: {
 
-						if ( ! this._enabledTranslate ) return;
 
 						const dollyX = this.dollyToCursor ? ( dragStartPosition.x - elementRect.x ) / elementRect.z *   2 - 1 : 0;
 						const dollyY = this.dollyToCursor ? ( dragStartPosition.y - elementRect.y ) / elementRect.w * - 2 + 1 : 0;
@@ -621,8 +620,6 @@ export class CameraControls extends EventDispatcher {
 					case ACTION.TOUCH_ZOOM_TRUCK:
 					case ACTION.TOUCH_DOLLY_OFFSET:
 					case ACTION.TOUCH_ZOOM_OFFSET: {
-
-						if ( ! this._enabledTranslate ) return;
 
 						const touchEvent = event as TouchEvent;
 						const dx = _v2.x - touchEvent.touches[ 1 ].clientX;
@@ -773,16 +770,16 @@ export class CameraControls extends EventDispatcher {
 	}
 
 
-	set enabledTranslate( enabled: boolean ) {
+	set enabledTruck( enabled: boolean ) {
 
-		this._enabledTranslate = enabled;
+		this._enabledTruck = enabled;
 		if ( ! enabled ) this.cancel();
 
 	}
 
-	get enabledTranslate(): boolean {
+	get enabledTruck(): boolean {
 
-		return this._enabledTranslate;
+		return this._enabledTruck;
 
 	}
 
@@ -1553,7 +1550,7 @@ export class CameraControls extends EventDispatcher {
 
 			if ( approxZero( zoomDelta ) ) this._zoom = this._zoomEnd;
 
-			this._camera.zoom = this._zoom;
+			this._camera.zoom = THREE.MathUtils.lerp( this._camera.zoom, this._zoom, lerpRatio );
 			this._camera.updateProjectionMatrix();
 			this._updateNearPlaneCorners();
 
