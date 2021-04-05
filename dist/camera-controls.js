@@ -34,6 +34,8 @@
 	};
 
 	function __extends(d, b) {
+	    if (typeof b !== "function" && b !== null)
+	        throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
 	    extendStatics(d, b);
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -1309,9 +1311,11 @@
 	            }
 	        }
 	        else {
-	            var vertices = geometry.vertices;
-	            for (var i = 0, l = vertices.length; i < l; i++) {
-	                maxRadiusSq = Math.max(maxRadiusSq, center.distanceToSquared(vertices[i]));
+	            var position = geometry.attributes.position;
+	            var vector = new THREE.Vector3();
+	            for (var i = 0, l = position.count; i < l; i++) {
+	                vector.fromBufferAttribute(position, i);
+	                maxRadiusSq = Math.max(maxRadiusSq, center.distanceToSquared(vector));
 	            }
 	        }
 	    });
