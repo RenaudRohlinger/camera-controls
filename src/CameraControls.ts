@@ -99,6 +99,7 @@ export class CameraControls extends EventDispatcher {
 	maxZoom = Infinity;
 
 	dampingFactor = 0.05;
+	zoomLerpFactor = 0.1;
 	draggingDampingFactor = 0.25;
 	azimuthRotateSpeed = 1.0;
 	polarRotateSpeed = 1.0;
@@ -1552,7 +1553,7 @@ export class CameraControls extends EventDispatcher {
 
 			if ( approxZero( zoomDelta ) ) this._zoom = this._zoomEnd;
 
-			this._camera.zoom = THREE.MathUtils.lerp( this._camera.zoom, this._zoom, lerpRatio );
+			this._camera.zoom = THREE.MathUtils.lerp( this._camera.zoom, this._zoom, this.zoomLerpFactor );
 			this._camera.updateProjectionMatrix();
 			this._updateNearPlaneCorners();
 
@@ -1597,6 +1598,7 @@ export class CameraControls extends EventDispatcher {
 			minAzimuthAngle      : infinityToMaxNumber( this.minAzimuthAngle ),
 			maxAzimuthAngle      : infinityToMaxNumber( this.maxAzimuthAngle ),
 			dampingFactor        : this.dampingFactor,
+			zoomLerpFactor        : this.zoomLerpFactor,
 			draggingDampingFactor: this.draggingDampingFactor,
 			dollySpeed           : this.dollySpeed,
 			truckSpeed           : this.truckSpeed,
@@ -1633,6 +1635,7 @@ export class CameraControls extends EventDispatcher {
 		this.minAzimuthAngle       = maxNumberToInfinity( obj.minAzimuthAngle );
 		this.maxAzimuthAngle       = maxNumberToInfinity( obj.maxAzimuthAngle );
 		this.dampingFactor         = obj.dampingFactor;
+		this.zoomLerpFactor 			 = obj.zoomLerpFactor;
 		this.draggingDampingFactor = obj.draggingDampingFactor;
 		this.dollySpeed            = obj.dollySpeed;
 		this.truckSpeed            = obj.truckSpeed;
