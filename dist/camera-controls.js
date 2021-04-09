@@ -214,6 +214,7 @@
 	        _this.minZoom = 0.01;
 	        _this.maxZoom = Infinity;
 	        _this.dampingFactor = 0.05;
+	        _this.zoomLerpFactor = 0.1;
 	        _this.draggingDampingFactor = 0.25;
 	        _this.azimuthRotateSpeed = 1.0;
 	        _this.polarRotateSpeed = 1.0;
@@ -242,6 +243,7 @@
 	        _this._yAxisUpSpace = new THREE.Quaternion().setFromUnitVectors(_this._camera.up, _AXIS_Y);
 	        _this._yAxisUpSpaceInverse = quatInvertCompat(_this._yAxisUpSpace.clone());
 	        _this._state = ACTION.NONE;
+	        _this._sphericalOffset = new THREE.Spherical();
 	        _this._domElement = domElement;
 	        _this._target = new THREE.Vector3();
 	        _this._targetEnd = _this._target.clone();
@@ -1034,9 +1036,9 @@
 	    CameraControls.prototype.update = function (delta) {
 	        var dampingFactor = this._state === ACTION.NONE ? this.dampingFactor : this.draggingDampingFactor;
 	        var lerpRatio = 1.0 - Math.exp(-dampingFactor * delta * FPS_60);
-	        var deltaTheta = this._sphericalEnd.theta - this._spherical.theta;
-	        var deltaPhi = this._sphericalEnd.phi - this._spherical.phi;
-	        var deltaRadius = this._sphericalEnd.radius - this._spherical.radius;
+	        var deltaTheta = this._sphericalEnd.theta - this._spherical.theta + this._sphericalOffset.theta;
+	        var deltaPhi = this._sphericalEnd.phi - this._spherical.phi + this._sphericalOffset.phi;
+	        var deltaRadius = this._sphericalEnd.radius - this._spherical.radius + this._sphericalOffset.radius;
 	        var deltaTarget = _v3A.subVectors(this._targetEnd, this._target);
 	        var deltaOffset = _v3B.subVectors(this._focalOffsetEnd, this._focalOffset);
 	        if (!approxZero(deltaTheta) ||
@@ -1114,7 +1116,7 @@
 	        if (this._camera.zoom !== this._zoom) {
 	            if (approxZero(zoomDelta))
 	                this._zoom = this._zoomEnd;
-	            this._camera.zoom = THREE.MathUtils.lerp(this._camera.zoom, this._zoom, lerpRatio);
+	            this._camera.zoom = THREE.MathUtils.lerp(this._camera.zoom, this._zoom, this.zoomLerpFactor);
 	            this._camera.updateProjectionMatrix();
 	            this._updateNearPlaneCorners();
 	            this._needsUpdate = true;
@@ -1146,6 +1148,7 @@
 	            minAzimuthAngle: infinityToMaxNumber(this.minAzimuthAngle),
 	            maxAzimuthAngle: infinityToMaxNumber(this.maxAzimuthAngle),
 	            dampingFactor: this.dampingFactor,
+	            zoomLerpFactor: this.zoomLerpFactor,
 	            draggingDampingFactor: this.draggingDampingFactor,
 	            dollySpeed: this.dollySpeed,
 	            truckSpeed: this.truckSpeed,
@@ -1175,6 +1178,7 @@
 	        this.minAzimuthAngle = maxNumberToInfinity(obj.minAzimuthAngle);
 	        this.maxAzimuthAngle = maxNumberToInfinity(obj.maxAzimuthAngle);
 	        this.dampingFactor = obj.dampingFactor;
+	        this.zoomLerpFactor = obj.zoomLerpFactor;
 	        this.draggingDampingFactor = obj.draggingDampingFactor;
 	        this.dollySpeed = obj.dollySpeed;
 	        this.truckSpeed = obj.truckSpeed;
@@ -1184,6 +1188,7 @@
 	        this._position0.fromArray(obj.position0);
 	        this._zoom0 = obj.zoom0;
 	        this._focalOffset0.fromArray(obj.focalOffset0);
+	        this._sphericalOffset = obj.sphericalOffset;
 	        this.moveTo(obj.target[0], obj.target[1], obj.target[2], enableTransition);
 	        _sphericalA.setFromVector3(position.sub(this._targetEnd).applyQuaternion(this._yAxisUpSpace));
 	        this.rotateTo(_sphericalA.theta, _sphericalA.phi, enableTransition);
