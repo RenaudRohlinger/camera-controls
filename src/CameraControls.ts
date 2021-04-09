@@ -141,6 +141,7 @@ export class CameraControls extends EventDispatcher {
 	// rotation and dolly distance
 	protected _spherical: _THREE.Spherical;
 	protected _sphericalEnd: _THREE.Spherical;
+	protected _sphericalOffset: _THREE.Spherical;
 
 	protected _zoom: number;
 	protected _zoomEnd: number;
@@ -181,6 +182,7 @@ export class CameraControls extends EventDispatcher {
 		this._yAxisUpSpace = new THREE.Quaternion().setFromUnitVectors( this._camera.up, _AXIS_Y );
 		this._yAxisUpSpaceInverse = quatInvertCompat( this._yAxisUpSpace.clone() );
 		this._state = ACTION.NONE;
+		this._sphericalOffset = new THREE.Spherical();
 
 		this._domElement = domElement;
 
@@ -1426,9 +1428,9 @@ export class CameraControls extends EventDispatcher {
 		const dampingFactor = this._state === ACTION.NONE ? this.dampingFactor : this.draggingDampingFactor;
 		const lerpRatio = 1.0 - Math.exp( - dampingFactor * delta * FPS_60 );
 
-		const deltaTheta  = this._sphericalEnd.theta  - this._spherical.theta;
-		const deltaPhi    = this._sphericalEnd.phi    - this._spherical.phi;
-		const deltaRadius = this._sphericalEnd.radius - this._spherical.radius;
+		const deltaTheta  = this._sphericalEnd.theta  - this._spherical.theta + this._sphericalOffset.theta;
+		const deltaPhi    = this._sphericalEnd.phi    - this._spherical.phi + this._sphericalOffset.phi;
+		const deltaRadius = this._sphericalEnd.radius - this._spherical.radius + this._sphericalOffset.radius;
 		const deltaTarget = _v3A.subVectors( this._targetEnd, this._target );
 		const deltaOffset = _v3B.subVectors( this._focalOffsetEnd, this._focalOffset );
 
