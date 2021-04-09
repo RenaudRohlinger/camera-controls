@@ -1648,6 +1648,7 @@ export class CameraControls extends EventDispatcher {
 		this._position0.fromArray( obj.position0 );
 		this._zoom0 = obj.zoom0;
 		this._focalOffset0.fromArray( obj.focalOffset0 );
+		this._sphericalOffset = obj.sphericalOffset;
 
 		this.moveTo( obj.target[ 0 ], obj.target[ 1 ], obj.target[ 2 ], enableTransition );
 		_sphericalA.setFromVector3( position.sub( this._targetEnd ).applyQuaternion( this._yAxisUpSpace ) );
